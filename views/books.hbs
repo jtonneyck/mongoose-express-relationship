@@ -1,0 +1,24 @@
+<div class="book-container">
+    {{#each books as | book|}}
+        {{!-- partials can take a second argument that makes a variable 
+        available in it. In this case the variable 'book' will contain book --}}
+        <a href="/books/detail/{{book._id}}">
+            {{>book book=book}}
+        </a>
+    {{/each}}
+</div>
+
+<style>
+    .book-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .book-container a {
+        text-decoration: none;
+        color: black;
+    }
+</style>
+

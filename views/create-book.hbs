@@ -1,0 +1,12 @@
+<form action="/books/create" method="POST">
+    <input type="text" name="title" placeholder="title">
+    <input type="text" name="description" placeholder="description">
+    <input type="text" name="image_url" placeholder="image_url">
+    <input type="text" name="rating" placeholder="rating">
+    <select name="author">
+        {{#each authors}}
+            <option value="{{_id}}">{{firstName}} {{lastName}}</option>
+        {{/each}}
+    </select>
+    <button type="submit">Write book!</button>
+</form>

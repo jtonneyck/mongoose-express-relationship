@@ -1,0 +1,12 @@
+<form action="/books/edit/{{book._id}}" method="POST">
+    <input type="text" name="title" value="{{book.title}}">
+    <input type="text" name="description" value="{{book.description}}">
+    <select name="author">
+        <option selected value="{{author._id}}">{{book.author.firstName}} {{book.author.lastName}}</option>
+        {{#each allAuthors}}
+            <option value="{{_id}}">{{firstName}} {{lastName}}</option>
+        {{/each}}
+    </select>
+
+    <button type="submit">Update</button>
+</form>
