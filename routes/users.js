@@ -1,25 +1,34 @@
 var express = require('express');
 var router = express.Router();
 var User = require("../models/User")
+var bcrypt = require('bcrypt');
 
 router.get('/signup', function(req, res, next) {
-  res.render('signup');
+  res.render('signup', {s});
 });
 
 router.post('/signup', function(req, res, next) {
-  debugger
-  let newUser = {
-    username: req.body.username, 
-    password: req.body.password
-  }
-  User.create(newUser)
+  
+
+  bcrypt.hash(req.body.password, 10, function(error, hash) {
+    debugger;
+    if(error) throw new Error("Encryption error");
+
+    let newUser = {
+      username: req.body.username, 
+      password: hash
+    }
+
+    User.create(newUser)
     .then((user)=> {
       debugger
       res.redirect('/users/login');
     })
-    .catch(()=> {
+    .catch((err)=> {
       res.send("error");
     })
+  });
+
 });
 
 router.get('/login', function(req, res, next) {
@@ -27,20 +36,25 @@ router.get('/login', function(req, res, next) {
 });
 
 router.post('/login', function(req, res, next) {
+  debugger
   User.findOne({username: req.body.username})
     .then((user)=> {
       debugger
       if(user) {
-        if(user.password === req.body.password) {
-          // log the user in
-          req.session.user = user; // start a session for user
-          res.redirect('/users/profile');
-        } else {
-          res.send("Invalid credentials");
-        }
+        bcrypt.compare(req.body.password, user.password, function(err, match) {
+          if(err) throw new Error("Encryption error");
+          if(match) {
+            req.session.user = user;
+            res.redirect("/users/profile");
+          } else {
+            // password incorrect
+            res.send("Invalid credentials.")
+          }
+        });
       } else {
+        // user not found
         res.send("Invalid credentials");
-      }
+      }     
     })
     .catch((error)=> {
       res.send("error")

@@ -28,25 +28,41 @@ mongoose.connect("mongodb://localhost/library2")
   .catch((error)=> {
     console.log("Connecting to mongodb failed, reason: ", error)
   })
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 hbs.registerPartials(__dirname + '/views/partials');
 
-app.use(logger('dev'));
+// set up middleware
+// these will always run before every request
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/books', booksRouter);
+// defining custom route protection middleware
+let protectRoute = function(req, res, next) {
+  if(req.session.user) next();
+  else res.redirect("/users/login")
+}
 
-// // catch 404 and forward to error handler
-// app.use(function(req, res, next) {
-//   next(createError(404));
-// });
+// attaching session data to res.locals, 
+// making it available to all hbs files after this middleware
+app.use(function(req,res,next) {
+  if(req.session.user) res.locals.user = req.session.user;
+  next();
+})
+
+app.use('/users', usersRouter);
+app.use('/books', protectRoute, booksRouter);
+app.use('/', indexRouter);
+
+// catch all requests that are neither part of userRouter
+// booksRouter nor indexRouter
+app.use(function(req, res, next) {
+  next({message: "Page not found.", status: 404});
+});
 
 // error handler
 app.use(function(err, req, res, next) {
